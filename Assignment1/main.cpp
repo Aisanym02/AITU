@@ -1,263 +1,206 @@
-// Подключаем стандартную библиотеку для ввода/вывода (cout, endl)
+// Подключаем библиотеку для ввода и вывода (cout, endl)
 #include <iostream>
 
-// Подключаем библиотеку для генерации случайных чисел (rand, srand)
+// Подключаем функции rand(), srand()
 #include <cstdlib>
 
-// Подключаем библиотеку для работы со временем (time)
+// Подключаем функцию time()
 #include <ctime>
 
-// Подключаем библиотеку для замера времени выполнения
+// Подключаем средства для измерения времени выполнения
 #include <chrono>
 
-// Подключаем библиотеку для работы с предельными значениями int
-#include <limits>
-
-// Если компилятор поддерживает OpenMP
-#ifdef _OPENMP
-// Подключаем библиотеку OpenMP
+// Подключаем OpenMP для параллельных вычислений
 #include <omp.h>
-#endif
 
 // Используем стандартное пространство имён
 using namespace std;
 
-// Используем пространство имён chrono для замера времени
-using namespace std::chrono;
+// Используем пространство имён chrono для работы со временем
+using namespace chrono;
 
-// ======================================================
-// ФУНКЦИЯ: заполнение массива случайными числами [1..100]
-// ======================================================
-void fill_random(int* arr, size_t n) {
-    // Цикл по всем элементам массива
-    for (size_t i = 0; i < n; i++) {
-        // Генерируем случайное число от 1 до 100
-        arr[i] = rand() % 100 + 1;
-    }
-}
+int main() {
 
-// ======================================================
-// ЗАДАНИЕ 1
-// Создание динамического массива из 50 000 элементов
-// Нахождение среднего значения
-// ======================================================
-void task1() {
+    // Инициализация генератора случайных чисел
+    // Используем текущее время, чтобы числа были разными при каждом запуске
+    srand(time(nullptr));
+
+    // ===============================
+    // ЗАДАНИЕ 1
+    // ===============================
+
     // Размер массива
-    const size_t N = 50000;
+    const int N1 = 50000;
 
-    // Динамическое выделение памяти под массив
-    int* arr = new int[N];
+    // Динамическое выделение памяти под массив из 50 000 целых чисел
+    int* arr1 = new int[N1];
 
-    // Заполняем массив случайными числами
-    fill_random(arr, N);
+    // Заполняем массив случайными числами от 1 до 100
+    for (int i = 0; i < N1; i++) {
+        arr1[i] = rand() % 100 + 1;
+    }
 
-    // Переменная для хранения суммы элементов
-    long long sum = 0;
+    // Переменная для хранения суммы элементов массива
+    long long sum1 = 0;
 
-    // Считаем сумму элементов массива
-    for (size_t i = 0; i < N; i++) {
-        sum += arr[i];
+    // Последовательно суммируем все элементы массива
+    for (int i = 0; i < N1; i++) {
+        sum1 += arr1[i];
     }
 
     // Вычисляем среднее значение
-    double avg = static_cast<double>(sum) / static_cast<double>(N);
+    double avg1 = static_cast<double>(sum1) / N1;
 
     // Выводим результат
-    cout << "Task 1 - Average value (N=50000): " << avg << endl;
+    cout << "Task 1 - Average value: " << avg1 << endl;
 
     // Освобождаем динамически выделенную память
-    delete[] arr;
-}
+    delete[] arr1;
 
-// ======================================================
-// ЗАДАНИЕ 2
-// Последовательный поиск min и max в массиве
-// ======================================================
-void task2_sequential_minmax(const int* arr, size_t n, int &mn, int &mx) {
-    // Инициализируем минимальное значение максимально возможным int
-    mn = numeric_limits<int>::max();
+    // ===============================
+    // ЗАДАНИЕ 2
+    // ===============================
 
-    // Инициализируем максимальное значение минимально возможным int
-    mx = numeric_limits<int>::min();
-
-    // Проходим по массиву
-    for (size_t i = 0; i < n; i++) {
-        // Проверка на минимум
-        if (arr[i] < mn) mn = arr[i];
-
-        // Проверка на максимум
-        if (arr[i] > mx) mx = arr[i];
-    }
-}
-
-// ======================================================
-// Запуск задания 2 с замером времени
-// ======================================================
-void task2() {
     // Размер массива
-    const size_t N = 1000000;
+    const int N2 = 1000000;
 
-    // Выделяем память под массив
-    int* arr = new int[N];
+    // Динамическое выделение массива из 1 000 000 элементов
+    int* arr2 = new int[N2];
 
     // Заполняем массив случайными числами
-    fill_random(arr, N);
+    for (int i = 0; i < N2; i++) {
+        arr2[i] = rand();
+    }
 
-    // Переменные для min и max
-    int mn, mx;
+    // Запоминаем время начала последовательного алгоритма
+    auto start_seq = high_resolution_clock::now();
 
-    // Запоминаем время начала
-    auto t1 = high_resolution_clock::now();
+    // Инициализируем минимальное и максимальное значения
+    int min_val = arr2[0];
+    int max_val = arr2[0];
 
-    // Последовательный поиск min/max
-    task2_sequential_minmax(arr, N, mn, mx);
+    // Последовательный поиск минимума и максимума
+    for (int i = 1; i < N2; i++) {
+        if (arr2[i] < min_val) min_val = arr2[i];
+        if (arr2[i] > max_val) max_val = arr2[i];
+    }
 
-    // Запоминаем время окончания
-    auto t2 = high_resolution_clock::now();
+    // Фиксируем время окончания алгоритма
+    auto end_seq = high_resolution_clock::now();
 
-    // Вычисляем длительность выполнения в миллисекундах
-    auto ms = duration_cast<milliseconds>(t2 - t1).count();
+    // Выводим найденные значения
+    cout << "Task 2 - Sequential Min: " << min_val
+         << ", Max: " << max_val << endl;
 
-    // Выводим результат
-    cout << "Task 2 - Sequential min/max: min=" << mn
-         << ", max=" << mx
-         << ", time=" << ms << " ms" << endl;
+    // Выводим время выполнения последовательного алгоритма
+    cout << "Sequential time: "
+         << duration_cast<milliseconds>(end_seq - start_seq).count()
+         << " ms" << endl;
+
+    // ===============================
+    // ЗАДАНИЕ 3 (OpenMP)
+    // ===============================
+
+    // Инициализируем переменные для параллельного поиска
+    int min_par = arr2[0];
+    int max_par = arr2[0];
+
+    // Запоминаем время начала параллельного алгоритма
+    auto start_par = high_resolution_clock::now();
+
+    // Параллельный цикл OpenMP
+    // reduction(min:min_par) — корректно объединяет минимальные значения
+    // reduction(max:max_par) — корректно объединяет максимальные значения
+#pragma omp parallel for reduction(min:min_par) reduction(max:max_par)
+    for (int i = 0; i < N2; i++) {
+        if (arr2[i] < min_par) min_par = arr2[i];
+        if (arr2[i] > max_par) max_par = arr2[i];
+    }
+
+    // Фиксируем время окончания параллельного алгоритма
+    auto end_par = high_resolution_clock::now();
+
+    // Выводим результаты параллельного поиска
+    cout << "Task 3 - Parallel Min: " << min_par
+         << ", Max: " << max_par << endl;
+
+    // Выводим время выполнения параллельного алгоритма
+    cout << "Parallel time: "
+         << duration_cast<milliseconds>(end_par - start_par).count()
+         << " ms" << endl;
 
     // Освобождаем память
-    delete[] arr;
-}
+    delete[] arr2;
 
-// ======================================================
-// ЗАДАНИЕ 3
-// Параллельный поиск min/max с OpenMP
-// ======================================================
-void task3_parallel_minmax(const int* arr, size_t n, int &mn, int &mx) {
-    // Инициализация глобальных min/max
-    mn = numeric_limits<int>::max();
-    mx = numeric_limits<int>::min();
+    // ===============================
+    // ЗАДАНИЕ 4
+    // ===============================
 
-#ifdef _OPENMP
-    // Параллельная область
-    #pragma omp parallel
-    {
-        // Локальный минимум для потока
-        int local_min = numeric_limits<int>::max();
+    // Размер массива
+    const int N3 = 5000000;
 
-        // Локальный максимум для потока
-        int local_max = numeric_limits<int>::min();
+    // Динамическое выделение массива
+    int* arr3 = new int[N3];
 
-        // Распределяем цикл между потоками
-        #pragma omp for nowait
-        for (long long i = 0; i < (long long)n; i++) {
-            if (arr[i] < local_min) local_min = arr[i];
-            if (arr[i] > local_max) local_max = arr[i];
-        }
-
-        // Критическая секция — безопасное обновление общих данных
-        #pragma omp critical
-        {
-            if (local_min < mn) mn = local_min;
-            if (local_max > mx) mx = local_max;
-        }
-    }
-#else
-    // Если OpenMP не поддерживается — обычный последовательный вариант
-    task2_sequential_minmax(arr, n, mn, mx);
-#endif
-}
-
-// ======================================================
-// Сравнение sequential и parallel
-// ======================================================
-void task3() {
-    const size_t N = 1000000;
-    int* arr = new int[N];
-
-    fill_random(arr, N);
-
-    int mn1, mx1;
-    auto s1 = high_resolution_clock::now();
-    task2_sequential_minmax(arr, N, mn1, mx1);
-    auto s2 = high_resolution_clock::now();
-
-    int mn2, mx2;
-    auto p1 = high_resolution_clock::now();
-    task3_parallel_minmax(arr, N, mn2, mx2);
-    auto p2 = high_resolution_clock::now();
-
-#ifdef _OPENMP
-    cout << "OpenMP threads: " << omp_get_max_threads() << endl;
-#endif
-
-    cout << "Task 3 - Sequential time: "
-         << duration_cast<milliseconds>(s2 - s1).count() << " ms" << endl;
-
-    cout << "Task 3 - Parallel time: "
-         << duration_cast<milliseconds>(p2 - p1).count() << " ms" << endl;
-
-    delete[] arr;
-}
-
-// ======================================================
-// ЗАДАНИЕ 4
-// Среднее значение: sequential vs OpenMP reduction
-// ======================================================
-double avg_sequential(const int* arr, size_t n) {
-    long long sum = 0;
-    for (size_t i = 0; i < n; i++) {
-        sum += arr[i];
-    }
-    return (double)sum / n;
-}
-
-double avg_parallel(const int* arr, size_t n) {
-#ifdef _OPENMP
-    long long sum = 0;
-
-    // reduction — безопасное суммирование между потоками
-    #pragma omp parallel for reduction(+:sum)
-    for (long long i = 0; i < (long long)n; i++) {
-        sum += arr[i];
+    // Заполняем массив случайными числами от 0 до 99
+    for (int i = 0; i < N3; i++) {
+        arr3[i] = rand() % 100;
     }
 
-    return (double)sum / n;
-#else
-    return avg_sequential(arr, n);
-#endif
-}
+    // ---- Последовательное вычисление среднего ----
 
-// ======================================================
-// Главная функция
-// ======================================================
-int main() {
-    // Инициализация генератора случайных чисел
-    srand(time(nullptr));
+    // Запоминаем время начала
+    auto start_avg_seq = high_resolution_clock::now();
 
-    // Запуск всех заданий
-    task1();
-    task2();
-    task3();
+    // Переменная для суммы
+    long long sum_seq = 0;
 
-    // Размер массива 5 000 000
-    const size_t N = 5000000;
-    int* arr = new int[N];
-    fill_random(arr, N);
+    // Последовательное суммирование
+    for (int i = 0; i < N3; i++) {
+        sum_seq += arr3[i];
+    }
 
-    auto s1 = high_resolution_clock::now();
-    double a1 = avg_sequential(arr, N);
-    auto s2 = high_resolution_clock::now();
+    // Вычисляем среднее значение
+    double avg_seq = static_cast<double>(sum_seq) / N3;
 
-    auto p1 = high_resolution_clock::now();
-    double a2 = avg_parallel(arr, N);
-    auto p2 = high_resolution_clock::now();
+    // Время окончания
+    auto end_avg_seq = high_resolution_clock::now();
 
-    cout << "Task 4 - Sequential avg: " << a1
-         << ", time=" << duration_cast<milliseconds>(s2 - s1).count() << " ms" << endl;
+    // ---- Параллельное вычисление среднего ----
 
-    cout << "Task 4 - Parallel avg: " << a2
-         << ", time=" << duration_cast<milliseconds>(p2 - p1).count() << " ms" << endl;
+    // Запоминаем время начала
+    auto start_avg_par = high_resolution_clock::now();
 
-    delete[] arr;
+    // Переменная для параллельной суммы
+    long long sum_par = 0;
 
+    // Параллельное суммирование с использованием reduction
+#pragma omp parallel for reduction(+:sum_par)
+    for (int i = 0; i < N3; i++) {
+        sum_par += arr3[i];
+    }
+
+    // Вычисляем среднее значение
+    double avg_par = static_cast<double>(sum_par) / N3;
+
+    // Время окончания
+    auto end_avg_par = high_resolution_clock::now();
+
+    // Вывод последовательного результата
+    cout << "Task 4 - Sequential avg: " << avg_seq
+         << ", time: "
+         << duration_cast<milliseconds>(end_avg_seq - start_avg_seq).count()
+         << " ms" << endl;
+
+    // Вывод параллельного результата
+    cout << "Task 4 - Parallel avg: " << avg_par
+         << ", time: "
+         << duration_cast<milliseconds>(end_avg_par - start_avg_par).count()
+         << " ms" << endl;
+
+    // Освобождаем память
+    delete[] arr3;
+
+    // Завершаем программу
     return 0;
 }
